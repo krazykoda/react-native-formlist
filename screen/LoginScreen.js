@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import {connect} from 'react-redux';
 import {
   StyleSheet,
   Text,
@@ -7,22 +8,27 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import { login, dispatcher } from "../redux/actions/authActions";
+
 
 class LoginScreen extends Component {
     
     constructor(props) {
         super(props);
         this.state={
-            username:"",
+            email:"",
             password:""
         }
-
+        console.log(props)
         this.navigator = props.navigation
     }
 
-    login = () => {
-      console.log(this.state, this.navigator)
-      this.navigator.navigate("contact")
+    
+    onLogin = () => {
+      if(!this.state.email || !this.state.password) {
+        return this.props.dispatcher("error", {login: "please fill the form"})
+      }
+      this.props.login(this.state.email, this.state.password)
     }
 
     signup = () => {
@@ -38,14 +44,16 @@ class LoginScreen extends Component {
         </View>
 
         <View>
+          {this.props.appState.errors.login && 
+            <Text style={{color: 'red'}}> {this.props.appState.errors.login} </Text>
+          }
           <TextInput
             style={styles.input}
-            placeholder="Username"
+            placeholder="email"
             placeholderTextColor="#aaaaaa"
-            value={this.state.username}
-            onChangeText={(username)=>{
-              this.log(username)
-              this.setState({username})
+            value={this.state.email}
+            onChangeText={(email)=>{
+              this.setState({email})
             }}
           />
           <TextInput
@@ -62,7 +70,7 @@ class LoginScreen extends Component {
         </View>
 
         <View>
-          <TouchableOpacity style={styles.button} onPress={this.login}>
+          <TouchableOpacity style={styles.button} onPress={this.onLogin}>
             <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
         </View>
@@ -79,7 +87,7 @@ class LoginScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     margin: 60,
-    marginTop: 120,
+    marginTop: 100,
   },
 
   loginText: {
@@ -135,4 +143,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+const mapStateToProps = (state) => {
+  return {
+    appState: state,
+  }
+}
+
+export default  connect(mapStateToProps, {login, dispatcher})(LoginScreen);

@@ -4,7 +4,6 @@ import Contact from "../components/Contact";
 
 
 
-
 export default function ContactsScreen() {
   const contacts = [
     { name: "Sam Bob", number: "043-565-7665" },

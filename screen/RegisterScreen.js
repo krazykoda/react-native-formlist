@@ -7,13 +7,15 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import { createEmailAccount, dispatcher } from "../redux/actions/authActions";
+import {connect} from "react-redux"
 
 class RegisterScreen extends Component {
     
     constructor(props) {
         super(props);
         this.state={
-            username:"",
+            email:"",
             password:"",
             comfirm_password: ""
         }
@@ -22,8 +24,20 @@ class RegisterScreen extends Component {
     }
 
     register = () => {
-      console.log(this.state, this.navigator)
-      this.navigator.navigate("contact")
+      console.log(this.props)
+      if(!this.state.email || !this.state.password) {
+        return this.props.dispatcher("error", {register: "Please fill the form"})
+      }
+      if(this.state.password !== this.state.comfirm_password) {
+        return this.props.dispatcher("error", {register: "Password does not match"})
+      }
+
+      this.props.createEmailAccount(this.state.email, this.state.password)
+      
+    }
+
+    login = () => {
+      this.navigator.navigate("login")
     }
     
 
@@ -35,14 +49,16 @@ class RegisterScreen extends Component {
         </View>
 
         <View>
+          {this.props.appState.errors.register && 
+            <Text style={{color: 'red'}}> {this.props.appState.errors.register} </Text>
+          }
           <TextInput
             style={styles.input}
-            placeholder="Username"
+            placeholder="email"
             placeholderTextColor="#aaaaaa"
-            value={this.state.username}
-            onChangeText={(username)=>{
-              this.log(username)
-              this.setState({username})
+            value={this.state.email}
+            onChangeText={(email)=>{
+              this.setState({email})
             }}
           />
           <TextInput
@@ -60,9 +76,9 @@ class RegisterScreen extends Component {
             placeholder="Confirm Password"
             placeholderTextColor="#aaaaaa"
             secureTextEntry={true}
-            value={this.state.password}
+            value={this.state.comfirm_password}
             onChangeText={(password)=>{
-                this.setState({password})
+                this.setState({comfirm_password: password})
             }}
           />
         </View>
@@ -73,10 +89,10 @@ class RegisterScreen extends Component {
           </TouchableOpacity>
         </View>
 
-        {/* <View style={styles.noAccountContainer}>
-          <Text style={styles.noAccountText}>Don't have an account?</Text>
-          <Text style={styles.signUpText}>Sign up</Text>
-        </View> */}
+        <View style={styles.noAccountContainer}>
+          <Text style={styles.noAccountText}>Already have an account?</Text>
+          <Text style={styles.signUpText} onPress={this.login}>Log in</Text>
+        </View>
       </ScrollView>
     );
   }
@@ -85,7 +101,7 @@ class RegisterScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     margin: 60,
-    marginTop: 120,
+    marginTop: 100,
   },
 
   loginText: {
@@ -141,4 +157,16 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterScreen;
+const mapStateToProps = (state) => {
+  return {
+    appState: state,
+  }
+}
+
+const mapDispatchToProps = {
+  createEmailAccount,
+  dispatcher
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(RegisterScreen);
